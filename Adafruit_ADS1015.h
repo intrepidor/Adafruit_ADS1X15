@@ -79,7 +79,7 @@
     #define ADS1015_REG_CONFIG_MODE_CONTIN  (0x0000)  // Continuous conversion mode
     #define ADS1015_REG_CONFIG_MODE_SINGLE  (0x0100)  // Power-down single-shot mode (default)
 
-    #define ADS1015_REG_CONFIG_DR_MASK      (0x00E0)  
+    #define ADS1015_REG_CONFIG_DR_MASK      (0x00E0)
     #define ADS1015_REG_CONFIG_DR_128SPS    (0x0000)  // 128 samples per second
     #define ADS1015_REG_CONFIG_DR_250SPS    (0x0020)  // 250 samples per second
     #define ADS1015_REG_CONFIG_DR_490SPS    (0x0040)  // 490 samples per second
@@ -136,6 +136,7 @@ protected:
   int16_t   getLastConversionResults();
   void      setGain(adsGain_t gain);
   adsGain_t getGain(void);
+  float		getMilliVoltsPerCount(void);
 
  private:
 };
@@ -145,6 +146,7 @@ class Adafruit_ADS1115 : public Adafruit_ADS1015
 {
  public:
   Adafruit_ADS1115(uint8_t i2cAddress = ADS1015_ADDRESS);
+  float		getMilliVoltsPerCount(void);
 
  private:
 };

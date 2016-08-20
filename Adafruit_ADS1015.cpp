@@ -77,7 +77,7 @@ static uint16_t readRegister(uint8_t i2cAddress, uint8_t reg) {
   i2cwrite(ADS1015_REG_POINTER_CONVERT);
   Wire.endTransmission();
   Wire.requestFrom(i2cAddress, (uint8_t)2);
-  return ((i2cread() << 8) | i2cread());  
+  return ((i2cread() << 8) | i2cread());
 }
 
 /**************************************************************************/
@@ -85,7 +85,7 @@ static uint16_t readRegister(uint8_t i2cAddress, uint8_t reg) {
     @brief  Instantiates a new ADS1015 class w/appropriate properties
 */
 /**************************************************************************/
-Adafruit_ADS1015::Adafruit_ADS1015(uint8_t i2cAddress) 
+Adafruit_ADS1015::Adafruit_ADS1015(uint8_t i2cAddress)
 {
    m_i2cAddress = i2cAddress;
    m_conversionDelay = ADS1015_CONVERSIONDELAY;
@@ -145,7 +145,7 @@ uint16_t Adafruit_ADS1015::readADC_SingleEnded(uint8_t channel) {
   {
     return 0;
   }
-  
+
   // Start with default values
   uint16_t config = ADS1015_REG_CONFIG_CQUE_NONE    | // Disable the comparator (default val)
                     ADS1015_REG_CONFIG_CLAT_NONLAT  | // Non-latching (default val)
@@ -185,11 +185,11 @@ uint16_t Adafruit_ADS1015::readADC_SingleEnded(uint8_t channel) {
 
   // Read the conversion results
   // Shift 12-bit results right 4 bits for the ADS1015
-  return readRegister(m_i2cAddress, ADS1015_REG_POINTER_CONVERT) >> m_bitShift;  
+  return readRegister(m_i2cAddress, ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
 }
 
 /**************************************************************************/
-/*! 
+/*!
     @brief  Reads the conversion results, measuring the voltage
             difference between the P (AIN0) and N (AIN1) input.  Generates
             a signed value since the difference can be either
@@ -207,7 +207,7 @@ int16_t Adafruit_ADS1015::readADC_Differential_0_1() {
 
   // Set PGA/voltage range
   config |= m_gain;
-                    
+
   // Set channels
   config |= ADS1015_REG_CONFIG_MUX_DIFF_0_1;          // AIN0 = P, AIN1 = N
 
@@ -240,7 +240,7 @@ int16_t Adafruit_ADS1015::readADC_Differential_0_1() {
 }
 
 /**************************************************************************/
-/*! 
+/*!
     @brief  Reads the conversion results, measuring the voltage
             difference between the P (AIN2) and N (AIN3) input.  Generates
             a signed value since the difference can be either
@@ -312,7 +312,7 @@ void Adafruit_ADS1015::startComparator_SingleEnded(uint8_t channel, int16_t thre
 
   // Set PGA/voltage range
   config |= m_gain;
-                    
+
   // Set single-ended input channel
   switch (channel)
   {
@@ -368,4 +368,48 @@ int16_t Adafruit_ADS1015::getLastConversionResults()
     return (int16_t)res;
   }
 }
+
+float Adafruit_ADS1015::getMilliVoltsPerCount(void) {
+	  //                                                                ADS1015  ADS1115
+	  //                                                                -------  -------
+	  // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
+	  // ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+	  // ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
+	  // ads.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
+	  // ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
+	  // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+	switch(m_gain) {
+		case GAIN_TWOTHIRDS: return 0.003;
+		case GAIN_ONE:		 return 0.002;
+		case GAIN_TWO:		 return 0.001;
+		case GAIN_FOUR:		 return 0.0005;
+		case GAIN_EIGHT:	 return 0.00025;
+		case GAIN_SIXTEEN:	 return 0.000125;
+		default: 			 return 0.0F;
+	}
+	return 0.0F;
+}
+
+float Adafruit_ADS1115::getMilliVoltsPerCount(void) {
+	  //                                                                ADS1015  ADS1115
+	  //                                                                -------  -------
+	  // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
+	  // ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+	  // ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
+	  // ads.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
+	  // ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
+	  // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+	switch(m_gain) {
+		case GAIN_TWOTHIRDS: return 0.0001875;
+		case GAIN_ONE:		 return 0.000125;
+		case GAIN_TWO:		 return 0.0000625;
+		case GAIN_FOUR:		 return 0.00003125;
+		case GAIN_EIGHT:	 return 0.000015625;
+		case GAIN_SIXTEEN:	 return 0.0000078125;
+		default: 			 return 0.0F;
+	}
+	return 0.0F;
+}
+
+
 
